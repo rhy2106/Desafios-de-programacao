@@ -9,26 +9,22 @@ vector<vector<int>> grafo;
 vector<int> visitados;
 vector<int> lista;
 vector<int> lista2;
-vector<int> chaves;
+vector<vector<int>> chaves;
 
 void bfs(int rotulo){
     if(visitados[rotulo] == 0){
-        int fim = 1;
         visitados[rotulo] = 1;
-        for(int i = 0; i < grafo[chaves[rotulo]].size(); i++){
-            cout << grafo[chaves[rotulo]][i] << " " << rotulo << endl;
-            if(visitados[grafo[chaves[rotulo]][i]] != 0) {
-                fim = 0;
+        for(int i = 0; i < chaves[rotulo].size(); i++){
+            for(int j = 0; j < lista2.size(); j++){
+                if(chaves[rotulo][i] == lista2[j]){
+                    break;
+                } else if(j == lista2.size()-1){
+                    lista2.push_back(chaves[rotulo][i]);
+                }
             }
-            if(fim == 0){
-                lista2.push_back(chaves[rotulo]);
-                break;
+            if(lista2.empty()){
+                lista2.push_back(chaves[rotulo][i]);
             }
-        }
-        cout << "fim " << fim << endl;
-        if(fim == 1){
-            visitados[rotulo] = 0;
-            lista2.push_back(rotulo);
         }
     }
 }
@@ -41,7 +37,7 @@ int main() {
         visitados.clear();
         visitados.resize(N,0);
         chaves.clear();
-        chaves.resize(N-1,0);
+        chaves.resize(N);
         lista.clear();
         lista2.clear();
         for(int i = 0; i < M; i++){
@@ -53,25 +49,9 @@ int main() {
         for(int i = 1; i < N; i++){
             int chave;
             cin >> chave;
-            chaves[chave-1] = i;
+            chaves[chave-1].push_back(i);
         }
-        for(int i = 0; i < N; i++){
-            cout << "[";
-            for(int j = 0; j < grafo[i].size(); j++){
-                cout << grafo[i][j] << " ";
-            }
-            cout << "] ";
-        }
-        cout << endl;
-
-        for(int i = 0; i < N-1; i++){
-            cout << chaves[i] << " ";
-        }
-        cout << endl;
         lista.push_back(0);
-        for(int i = 0; i < grafo[0].size(); i++){
-            lista.push_back(grafo[0][i]);
-        }
         while (true){
             for(int i = 0; i < lista.size(); i = 0){
                 bfs(lista[lista.size()-1]);
@@ -79,15 +59,35 @@ int main() {
                     lista.pop_back();
                 }
             }
-            if(lista.empty() && lista2.empty()){
+            for(int i = 0; i < lista2.size(); i++){
+                if(visitados[lista2[i]] == 0){
+                    for(int j = 0; j < grafo[lista2[i]].size(); j++){
+                        if(visitados[grafo[lista2[i]][j]] == 1){
+                            lista.push_back(lista2[i]);
+                            break;
+                        }
+                    }
+                } else{
+                    for(int j = 0; j < grafo[lista2[i]].size(); j++){
+                        if(visitados[grafo[lista2[i]][j]] == 0){
+                            lista.push_back(grafo[lista2[i]][j]);
+                        }
+                    }
+                }
+            }
+            if(lista.empty()){
                 break;
             }
-            for(int i = 0; i < lista2.size(); i++){
-                lista.push_back(lista2[i]);
-            }
-            lista2.clear();
         }
 
+        for(int i = 0; i < M; i++){
+            cout << "[";
+            for(int j = 0; j < grafo[i].size(); i++){
+                cout << grafo[i][j] << " ";
+            }
+            cout << "]";
+        }
+        cout << endl;
         for(int i = 0; i < N; i++){
             if(visitados[i] == 0){
                 cout << "nao" << endl;
