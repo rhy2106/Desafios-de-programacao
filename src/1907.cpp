@@ -21,9 +21,12 @@ void dfs(int rotulo){
      }
 }
 int main() {
-    cin >> N >> M;
+    scanf("%d %d", &N, &M);
+    grafo.clear();
     grafo.resize(N*M);
+    visitados.clear();
     visitados.resize(N*M,0);
+    matriz.clear();
     matriz.resize(N);
     int cont = 0;
     for(int i = 0; i < N*M; i++){
@@ -40,10 +43,9 @@ int main() {
             grafo[i].push_back(i+M);
         }
     }
-    cin.ignore();
     for(int i = 0; i < N; i++){
         string tmp;
-        getline(cin,tmp);
+        cin >> tmp;
         for(int j = 0; j < M; j++){
             matriz[i].push_back(tmp[j]);
         }
@@ -52,10 +54,8 @@ int main() {
         if(visitados[i] == 0 && matriz[i/M][i%M] == '.'){
             cont += 1;
             dfs(i);
-        } else{
-            visitados[i] = 1;
         }
     }
-    cout << cont << endl;
+    printf("%d\n", cont);
     return 0;
 }
