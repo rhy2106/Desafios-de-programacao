@@ -3,7 +3,7 @@
 using namespace std;
 
 int main(){
-    int N, erro;
+    int N;
     while(cin >> N, N != 0){
         stack<int> A;
         stack<int> E;
@@ -14,7 +14,6 @@ int main(){
                 cin >> tmp;
                 A.push(tmp);
             }
-            erro = 0;
             int B = N;
             while(B > 0){
                 if(!E.empty()){
@@ -33,20 +32,13 @@ int main(){
                         A.pop();
                     }
                 } else if(E.top() != B){
-                    erro = 1;
                     break;
                 }
             }
-            if(B == 0 && erro == 0 && A.empty()){
+            if(B == 0){
                 cout << "Yes" << endl;
             } else{
                 cout << "No" << endl;
-            }
-            while(!A.empty()){
-                A.pop();
-            }
-            while(!E.empty()){
-                E.pop();
             }
         }
         cout << endl;
