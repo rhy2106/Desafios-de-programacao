@@ -1,66 +1,78 @@
 #include <bits/stdc++.h>
-
+#define _ ios_base::sync_with_stdio(0);cin.tie(0);
+#define ll long long
+#define mp make_pair
+#define f first
+#define s second
+#define pb push_back
+#define iPair pair<int,int>
+#define iTuple tuple<int,int,int>
+#define uset unordered_set<int>
+#define umap unordered_map<int,vector<int>>
+#define pq priority_queue <iTuple, vector<iTuple>, greater<iTuple>>
+const int INF = 0x3f3f3f3f;
+const ll int LINF = 0x3f3f3f3f3f3f3f3fll;
+const int MAXN = 2e5+5;
+const int LOG = 30;
+ 
 using namespace std;
-
+// mechi no codigo agora ta tudo errado
 vector<vector<int>> grafo;
 vector<int> visitados;
 vector<int> dependencias;
-vector<int> deep;
+vector<int> id, floresta;
+vector<int> depth;
 int n1, n2;
 
-bool discoDif(int x, int y){
-    return (x >= 0 && x < n1 && y >= n1 && y < n1+n2) || (y >= 0 && y < n1 && x >= n1 && x < n1+n2);
+int find(int x){
+    return id[x] = id[x] == x ? x : find(id[x]);
 }
 
-void dfs(int rotulo){
-    vector<int> fila;
-    int tmp = -1, cont = 0;
-    fila.push_back(rotulo);
-    while(!fila.empty()){
-        int pacote = fila[fila.size()-1];
-        visitados[pacote] = 1;
-        if(grafo[pacote].empty()){
-            deep.push_back(cont);
-            tmp = fila[fila.size()-1];
-            fila.pop_back();
-        }
-        for(int i = 0; i < grafo[pacote].size(); i++){
-            if(!visitados[grafo[pacote][i]]){
-                if(discoDif(pacote,grafo[pacote][i])) cont++;
-                fila.push_back(grafo[pacote][i]);
-                break;
-            }
-            if(visitados[grafo[pacote][i]] && i == grafo[pacote].size()-1){
-                if(tmp != -1 && tmp != pacote) visitados[tmp] = 0;
-                tmp = fila[fila.size()-1];
-                fila.pop_back();
-                if(discoDif(pacote,fila[fila.size()-1])) cont--;
-            }
-        }
-    }
+void unir(int x, int y){
+    x = find(x); y = find(y);
+    if(x == y) return;
+    if(floresta[x] > floresta[y]) swap(x,y);
+    dependencias[y] = max(dependencias[y], dependencias[x]);
+    floresta[y] += floresta[x];
+    id[x] = y;
 }
+
+
+int dfs(int x, int cont){
+    int tmp;
+    visitados[find(x)] = 1;
+    for(int item : grafo[find(x)]){
+        if(!visitados[find(item)]) tmp = dfs(find(item),cont+1);
+        cont = max(tmp, cont);
+    }
+    return cont;
+}
+
 int main() {
-    int d;
+    clock_t tinicio, tfim;
+    tinicio = clock();
+    _; int d;
     while (cin >> n1 >> n2 >> d, n1 != 0 || n2 != 0 || d != 0) {
         int total = n1 + n2;
         grafo.assign(total, vector<int>());
-        visitados.assign(total,0);
         dependencias.assign(total, 0);
-        deep.clear();
+        visitados.assign(total, 0);
+        floresta.assign(total, 1);
+        id.assign(total,0);
+        iota(id.begin(),id.end(),0);
         for (int i = 0; i < d; ++i) {
-            int x, y;
-            cin >> x >> y;
-            grafo[y-1].push_back(x-1);
-            dependencias[x-1]++;
+            int x, y; cin >> x >> y;
+            if((x-1 < n1 && y-1 < n1)||(x-1 >= n1 && y-1 >= n1)) unir(x-1,y-1);
+            else grafo[find(y-1)].pb(find(x-1));
+            dependencias[find(x-1)]++;
         }
-        for(int i = 0; i < total; i++){
-            visitados.assign(total,0);
-            if(dependencias[i] == 0) dfs(i);
+        int trocas = 0;
+        for(int i = 0; i < n1 + n2; i++){
+            if(dependencias[find(i)] == 0) trocas = max(trocas,dfs(find(i),0));
         }
-        int maior = 0;
-        for(int i = 0; i < deep.size(); i++){
-            if(deep[i] > maior) maior = deep[i];
-        }
-        cout << maior+2 << endl;
+        cout << trocas+2 << endl;
     }
+    tfim = clock();
+    cerr << (double)(tfim-tinicio)/CLOCKS_PER_SEC <<  " segundos" << endl;
+    return 0;
 }

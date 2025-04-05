@@ -1,4 +1,9 @@
 #include <bits/stdc++.h>
+#define f first
+#define s second
+#define pb push_back
+#define mp make_pair
+#define iPair pair<int,int>
 using namespace std;
 
 vector<vector<pair<int,int>>> grafo;
@@ -6,29 +11,17 @@ vector<int> precoMin;
 vector<int> visitados;
 
 void bfs(int rotulo, int fim){
-    queue<int> fila;
-    fila.push(rotulo);
+    priority_queue<iPair,vector<iPair>, greater<iPair>> fila;
+    fila.push(mp(0,rotulo));
     while(!fila.empty()){
-        int pacote = fila.front();
+        iPair pacote = fila.front();
         fila.pop();
-        visitados[pacote] = 1;
-        if(pacote > fim){
-            for(int i = 0; i < grafo[pacote].size(); i++){
-                if(grafo[pacote][i].second + precoMin[pacote] < precoMin[grafo[pacote][i].first]){
-                    precoMin[grafo[pacote][i].first] = grafo[pacote][i].second + precoMin[pacote];
-                    visitados[grafo[pacote][i].first] = 0;
-                }
-                if(!visitados[grafo[pacote][i].first]) fila.push(grafo[pacote][i].first);
-            }
-        } else{
-            for(int i = 0; i < grafo[pacote].size(); i++){
-                if(grafo[pacote][i].first != pacote+1) continue;
-                if(grafo[pacote][i].second + precoMin[pacote] < precoMin[grafo[pacote][i].first]){
-                    precoMin[grafo[pacote][i].first] = grafo[pacote][i].second + precoMin[pacote];
-                    visitados[grafo[pacote][i].first] = 0;
-                }
-                if(!visitados[grafo[pacote][i].first]) fila.push(grafo[pacote][i].first);
-            }
+        if(visitados[pacote.s]) continue;
+        visitados[pacote.s] = 1;
+        for(pair<int,int> item : grafo[pacote.s]){
+            if(pacote.s <= fim && item.f != pacote.s+1) continue;
+            precoMin[item.f] = item.s + precoMin[pacote.s];
+            if(!visitados[item.f]) fila.push(mp(precoMin[item.f],item.f));
         }
     }
 }
@@ -41,10 +34,9 @@ int main() {
         visitados.assign(N,0);
         precoMin[K] = 0;
         for(int i = 0; i < M; i++){
-            int x, y, p;
-            cin >> x >> y >> p;
-            grafo[x].push_back(make_pair(y,p));
-            grafo[y].push_back(make_pair(x,p));
+            int x, y, p; cin >> x >> y >> p;
+            grafo[x].pb(mp(y,p));
+            grafo[y].pb(mp(x,p));
         }
         if(K != C-1) bfs(K,C-1);
         cout << precoMin[C-1] << endl;
