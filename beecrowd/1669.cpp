@@ -1,78 +1,74 @@
 #include <bits/stdc++.h>
+
 #define _ ios_base::sync_with_stdio(0);cin.tie(0);
+#define ull unsigned long long
 #define ll long long
 #define mp make_pair
 #define f first
 #define s second
+#define endl '\n'
 #define pb push_back
 #define iPair pair<int,int>
 #define iTuple tuple<int,int,int>
-#define uset unordered_set<int>
-#define umap unordered_map<int,vector<int>>
+#define uset unordered_set
+#define umap unordered_map
 #define pq priority_queue <iTuple, vector<iTuple>, greater<iTuple>>
 const int INF = 0x3f3f3f3f;
-const ll int LINF = 0x3f3f3f3f3f3f3f3fll;
-const int MAXN = 2e5+5;
-const int LOG = 30;
- 
+const ll LINF = 0x3f3f3f3f3f3f3f3fll;
+const ll MOD = 1e9 + 7;
+
 using namespace std;
-// mechi no codigo agora ta tudo errado
-vector<vector<int>> grafo;
-vector<int> visitados;
-vector<int> dependencias;
-vector<int> id, floresta;
-vector<int> depth;
-int n1, n2;
 
-int find(int x){
-    return id[x] = id[x] == x ? x : find(id[x]);
+vector<vector<iPair>> g;
+vector<int> dep;
+vector<int> sum;
+
+int bfs(int c, int f){
+	priority_queue<iPair> fila;
+	int maior = 0;
+	for(int i = c; i <= f; i++)
+		if(dep[i] == 0) fila.push({0,i});
+	while(!fila.empty()){
+		auto [peso, pacote] = fila.top();
+		fila.pop();
+		if(sum[pacote] >= peso) continue;
+		sum[pacote] = peso;
+		maior = max(maior,peso);
+		for(auto [v,w] : g[pacote]){
+			if(sum[v] < w + peso) fila.push({w+peso,v});
+		}
+	}
+	return maior;
 }
 
-void unir(int x, int y){
-    x = find(x); y = find(y);
-    if(x == y) return;
-    if(floresta[x] > floresta[y]) swap(x,y);
-    dependencias[y] = max(dependencias[y], dependencias[x]);
-    floresta[y] += floresta[x];
-    id[x] = y;
-}
-
-
-int dfs(int x, int cont){
-    int tmp;
-    visitados[find(x)] = 1;
-    for(int item : grafo[find(x)]){
-        if(!visitados[find(item)]) tmp = dfs(find(item),cont+1);
-        cont = max(tmp, cont);
-    }
-    return cont;
-}
-
-int main() {
+int main(){
     clock_t tinicio, tfim;
     tinicio = clock();
-    _; int d;
-    while (cin >> n1 >> n2 >> d, n1 != 0 || n2 != 0 || d != 0) {
-        int total = n1 + n2;
-        grafo.assign(total, vector<int>());
-        dependencias.assign(total, 0);
-        visitados.assign(total, 0);
-        floresta.assign(total, 1);
-        id.assign(total,0);
-        iota(id.begin(),id.end(),0);
-        for (int i = 0; i < d; ++i) {
-            int x, y; cin >> x >> y;
-            if((x-1 < n1 && y-1 < n1)||(x-1 >= n1 && y-1 >= n1)) unir(x-1,y-1);
-            else grafo[find(y-1)].pb(find(x-1));
-            dependencias[find(x-1)]++;
-        }
-        int trocas = 0;
-        for(int i = 0; i < n1 + n2; i++){
-            if(dependencias[find(i)] == 0) trocas = max(trocas,dfs(find(i),0));
-        }
-        cout << trocas+2 << endl;
-    }
-    tfim = clock();
+    _;
+	int n1, n2, d;
+	while(cin >> n1 >> n2 >> d, n1 != 0 || n2 != 0 || d != 0){
+		int total = n1 + n2;
+		g.assign(total+1,vector<iPair>());
+		dep.assign(total+1,0);
+		sum.assign(total+1,-1);
+		for(int i = 0; i < d; i++){
+			int x, y; cin >> x >> y;
+			if(y <= n1 && x <= n1) g[y].pb({x,0});
+			else if( y > n1 && x > n1) g[y].pb({x,0});
+			else g[y].pb({x,1});
+			dep[x]++;
+		}
+
+		int m1 = bfs(1,n1);
+		int m2 = bfs(n1+1,total);
+		int maior = m1;
+		if(m2 == maior) maior++;
+		else if(m2 > maior) maior = m2;
+		cout << maior + 2 << endl;
+		
+	}
+	tfim = clock();
     cerr << (double)(tfim-tinicio)/CLOCKS_PER_SEC <<  " segundos" << endl;
     return 0;
 }
+
